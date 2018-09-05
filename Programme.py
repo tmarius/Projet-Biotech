@@ -24,6 +24,6 @@ elem = driver.find_element_by_id("searchInput")
 elem.send_keys("abricot")
 elem.send_keys(Keys.RETURN)
 assert "No results found." not in driver.page_source
-recup = driver.find_element_by_class_name("magnify")
+recup = driver.find_element_by_xpath("//*[@id='mw-content-text']/div/div[3]/div/div").text
 print (recup)
 #driver.close()
