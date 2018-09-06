@@ -53,23 +53,25 @@ def searchBySeq(espece, seq):
     try:
         driver.find_element_by_id("b1").click()
     except NoSuchElementException:
-        time.sleep(10)
+        pass
     
     #attendre que l'utilisateur sélectionne un gène
     i=0
     while i<50:
         try:
-            time.sleep(5)
+            time.sleep(60)
+            driver.switch_to_window(driver.window_handles[1])
             chaine_id = driver.find_element_by_xpath("//p[contains(@class,'itemid')]").text
-            #driver.switch_to_window(driver.window_handles[1])
             break
         except NoSuchElementException:
             i=i+1
-    motif = re.compile(r'(?<=GenBank: )[0-9]+')
+            print(i)
+    motif = re.compile(r'(?<=GenBank: )([A-Za-z]|[0-9])+')
     gene_id = motif.search(chaine_id)
     gene_id = gene_id.group(0)
     print (gene_id)
 
-#searchByNameId("Vitis vinifera","Vvht5")
+searchByNameId("Vitis vinifera","Vvht5")
 searchBySeq('Vitis vinifera (taxid:29760)','AATCAAGCATTTTATCAAATCAATTTGTTTAAACAGATGATGTGATGAAAGCCGTTTCTTTCTTACCTGTGTATTGGGAATTTAATACCGTAATATTTTGTATCATATACACACGTGTATATATATATATATATATATATATATATATGAAAATGTCTTTATCACATTA')
-#driver.close()
+
+   
