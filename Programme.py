@@ -7,23 +7,31 @@ Created on Wed Sep  5 14:34:26 2018
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-
-#driver = webdriver.Chrome()
-#driver.get("http://www.python.org")
-#assert "Python" in driver.title
-#elem = driver.find_element_by_name("q")
-#elem.clear()
-#elem.send_keys("pycon")
-#elem.send_keys(Keys.RETURN)
-#assert "No results found." not in driver.page_source
-#driver.close()
+from selenium.common.exceptions import NoSuchElementException  
+import time
+import re
 
 driver = webdriver.Chrome()
-driver.get("https://www.wikipedia.org/")
-elem = driver.find_element_by_id("searchInput")
-elem.send_keys("abricot")
+driver.get("https://www.ncbi.nlm.nih.gov/")
+driver.find_element_by_xpath("//a[contains(@href,'/gene/')]").click()
+elem = driver.find_element_by_id("term")
+elem.send_keys("VvHT5 vitis vinifera")
 elem.send_keys(Keys.RETURN)
 assert "No results found." not in driver.page_source
-recup = driver.find_element_by_xpath("//*[@id='mw-content-text']/div/div[3]/div/div").text
-print (recup)
+
+#attendre que l'utilisateur sélectionne un gène
+i=0
+while i<50:
+    try:
+        time.sleep(5)
+        chaine_id = driver.find_element_by_xpath("//span[@class='geneid']").text
+        break
+    except NoSuchElementException:
+        i=i+1
+        
+motif = re.compile(r'(?<=Gene ID: )[0-9]+')
+gene_id = motif.search(chaine_id)
+gene_id = gene_id.group(0)
+
+print (gene_id)
 #driver.close()
