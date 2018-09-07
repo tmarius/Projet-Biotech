@@ -21,6 +21,7 @@ from selenium.common.exceptions import TimeoutException
 from os import chdir,getcwd 
 import time
 import re
+import json
 
 
 #####################################################FIND GENE ID#########################"
@@ -119,10 +120,30 @@ def findCDS(gene_id):
     seq=driver.find_element_by_xpath("//pre").text
     return (seq)
 
+#######################################################MOITIER SUP#########################################
+def moitieCDS(seq):
+    long = len(seq)
+    longmoitie = int(long/2)
+#    print(longmoitie)
+    moitie = seq[0:longmoitie]
+    return (moitie)
+
+
 #######################################################CRISPR SGRNA###########################################
 def findSGRNA(seq):
+    
+    #Change le path de download
     path = getcwd(); 
+    path = path + '\\tmp' ;
     print (path);
+    
+    chrome_options = webdriver.ChromeOptions()
+    prefs = {'download.default_directory' : path }
+    chrome_options.add_experimental_option('prefs', prefs)
+    driver = webdriver.Chrome(chrome_options=chrome_options)
+    
+    
+    
     driver.get("https://crispr.dbcls.jp/")
     
 #    seq="ATGATTCATTCAATTGTTGGTGCCATTACTGGCGAAAATGATAAGAAGAAGATCAAGGGAACTGTTGTGTTGATGAAGAAGAATGTGTTGGATTTTAATGACTTCAATGCATCGGTTCTGGACCGGGTTCATGAGCTGTTGGGACAGGGAGTCTCTCTGCAGCTCGTCAGTGCTGTTCATGGTGATCCTGCAAATGGGTTACAGGGGAAACTTGGGAAACCAGCATACTTGGAAGACTGGATTACCACAATTACTTCTTTAACCGCTGGCGAGTCTGCATTCAAGGTCACGTTCGACTGGGATGAGGAGATTGGAGAGCCAGGGGCTTTCATAATTAGAAACAATCACCACAGTGAGTTTTACCTCAGGACTCTCACTCTTGAAGATGTTCCTGGGTGTGGCAGAATTCA CTTTGTTTGTAATTCCTGGGTCTACCCTGCTAAGCACTACAAAACTGACCGTGTTTTCTTCACTAATCAGACATATCTTCCAAGTGAAACACCAGGGCCACTGCGCAAGTACAGAAAAGGGGAACTGGTGAATCTGAGGGGAGATGGAACCGGAGAGCTTAAGGAATGGGATCGAGTGTATGACTATGCTTACTATAATGATTTGGGGAATCCAGACAGGGATCTCAAATACGCCCGCCCTGTGCTGGGAGGATCTGCAGAGTATCCTTATCCCAGGAGGGGAAGAACTGGTAGACCACCATCTGAAAAAGATCCCAACACCGAGAGCAGATTGCCACTTGTGATGAGCTTAAACATATATGTTCCAAGAGATGAACGATTTGGTCACCTCAAGATGTCAGACTTCCTGGCTTATGCCCTGAAATCCATAGTTCAATTCCTTCTCCCTGAGTTTGAGGCTCTATGTGACATCACCCCCAATGAGTTTGACAGCTTCCAAGATGTATTAGACCTCTACGAAGGAGGAATCAAGGTCCCAGAGGGCCCTTTACTTGACAAAATTAAGGACAACATCCCTCTTGAGATGCTCAAGGAACTTGTTCGTACTGATGGGGAACATCTCTTCAAGTTCCCAATGCCCCAAGTCATCAAAGAGGATAAGTCTGCATGGAGGACTGACGAAGAATTTGCTAGAGAAATGCTGGCTGGACTCAACCCAGTTGTCATCCGACTACTCCAAGAGTTTCCTCCAAAAAGCAAGCTGGATCCTGA"
@@ -145,7 +166,7 @@ def findSGRNA(seq):
     driver.find_element_by_xpath("//*[@id='ext-gen1018']/form/div[4]/ul/li[2]/a[2]").click()
     #driver.find_element_by_xpath("//a[contains(@type,'submit')]")
     time.sleep(9)
-    config = json.loads(open('C:/Users/Thomas/Downloads/CRISPRdirect.json').read())
+    config = json.loads(open(path+'\CRISPRdirect.json').read())
     results=config['results']
 
 #######################################################DEBUT PROGRAMME##############################################
@@ -153,9 +174,13 @@ driver = webdriver.Chrome()
 
 gene_id = searchByNameId("Vitis vinifera","Vvht5")
 print (gene_id)
-##gene_id2 = searchBySeq('Vitis vinifera (taxid:29760)','AATCAAGCATTTTATCAAATCAATTTGTTTAAACAGATGATGTGATGAAAGCCGTTTCTTTCTTACCTGTGTATTGGGAATTTAATACCGTAATATTTTGTATCATATACACACGTGTATATATATATATATATATATATATATATATGAAAATGTCTTTATCACATTA')
-##print (gene_id2)
+
 seq = findCDS(gene_id)
 print (seq)
 
-findSGRNA(seq)
+CDS = moitieCDS(seq)
+print (CDS)
+findSGRNA(CDS)
+
+
+
