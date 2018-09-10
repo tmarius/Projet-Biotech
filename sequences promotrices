@@ -1,0 +1,30 @@
+def sequencePromotrice(gene_id, CDS):
+    driver.get("https://www.ncbi.nlm.nih.gov/gene/")
+    query = driver.find_element_by_id("term")
+    query.send_keys(gene_id)
+    query.send_keys(Keys.RETURN)
+    time.sleep(10)
+    driver.find_element_by_id("button-1082").click()
+    driver.find_element_by_id("menuitem-1038-itemEl").click()
+    time.sleep(5)
+    #seq : enlever les retour à la ligne
+    seq = driver.find_element_by_xpath("//*[@id='seq-panel_0-body']/table/tbody/tr/td[2]/div").text 
+    time.sleep(5)
+    regle = re.compile(r'[\n]')
+    fasta = regle.sub("",seq)
+    #CDS : enlever le début representant les info FASTA et les retour a la ligne
+    regle = re.compile(r'[\n]')
+    CDS = regle.sub("",CDS)
+    motifCDS = re.compile(r'(ATG[ACTG]+)')
+    CDS = motifCDS.search(CDS)
+    CDS = CDS.group(0)
+    CDS = CDS[0:10]
+    #recupérer les séquences promotrices
+    motifPromot = re.compile(r'(([ATGC]+)(?='+CDS+'))')
+    res = motifPromot.search(fasta)
+    print(res)
+    res = res.group(0)
+    if len(res) > 2000:
+        coup = len(res) - 2000
+        res =  res[coup:len(res)]
+    return(res)
