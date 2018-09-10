@@ -1,8 +1,9 @@
+
 # -*- coding: utf-8 -*-
 """
 Created on Fri Sep  7 08:47:25 2018
 
-@author: Thomas
+@author: Thomas_Lucas_Clarisse_Nolan_Ivan_Clara
 """
 
 # -*- coding: utf-8 -*-
@@ -22,6 +23,8 @@ from os import chdir,getcwd
 import time
 import re
 import json
+import crisprPrototype1 
+import toExcel
 
 
 #####################################################FIND GENE ID#########################"
@@ -172,7 +175,8 @@ def findSGRNA(seq):
 #######################################################DEBUT PROGRAMME##############################################
 driver = webdriver.Chrome()  
 
-gene_id = searchByNameId("Vitis vinifera","Vvht5")
+#gene_id = searchByNameId("Vitis vinifera","Vvht5")
+gene_id = searchByNameId("Vitis vinifera","VvPAL")
 print (gene_id)
 
 seq = findCDS(gene_id)
@@ -182,5 +186,10 @@ CDS = moitieCDS(seq)
 print (CDS)
 findSGRNA(CDS)
 
+meilleur = crisprPrototype1.RetrouveBestSgrna()
+print (meilleur)
 
+espece = "Vitis vinifera"
+toExcel.createExcel(espece, gene_id, meilleur)
 
+driver.close()
