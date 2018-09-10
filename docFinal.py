@@ -224,19 +224,47 @@ def boiteProm(seqProm):
     query.send_keys(seqProm)
     driver.find_element_by_xpath("//*[@id='content']/form/input[5]").click()
     
-    
+
     
 #######################################################DEBUT PROGRAMME##############################################
-driver = webdriver.Chrome()  
 
-#gene_id = searchByNameId("Vitis vinifera","Vvht5")
-gene_id = searchBySeq("Vitis vinifera","atgcct gctggaggat tcgcggcccc gtcggccggt ggcgactttg aagccaagat cactcctatc gttatcattt cttgcatcat ggccgccacc ggcggcctca tgttcggcta cgacgtt")
+def rechSgRNASeq(espece,seq):
+    driver = webdriver.Chrome()  
+    gene_id = searchBySeq(espece,seq)
+    CDS = findCDS(gene_id)
+    CDSmoit = moitieCDS(CDS)
+    findSGRNA(CDSmoit)
 
-CDS = findCDS(gene_id)
+def rechSgRNAGeneId(espece,gene):
+    driver = webdriver.Chrome()  
+    gene_id = searchByNameId(espece,gene)
+    CDS = findCDS(gene_id)
+    CDSmoit = moitieCDS(CDS)
+    findSGRNA(CDSmoit)
+    
+def rechBoitPromSeq(espece,seq):
+    driver = webdriver.Chrome() 
+    gene_id = searchByNameId(espece,seq)
+    CDS = findCDS(gene_id)
+    CDSmoit = moitieCDS(CDS)
+    seqProm = sequencePromotrice(gene_id,CDSmoit)
+    boiteProm(seqProm)
+    
+def rechBoitPromGeneId(espece,gene):
+    driver = webdriver.Chrome() 
+    gene_id = searchByNameId(espece,gene)
+    CDS = findCDS(gene_id)
+    CDSmoit = moitieCDS(CDS)
+    seqProm = sequencePromotrice(gene_id,CDSmoit)
+    boiteProm(seqProm)
 
-CDSmoit = moitieCDS(CDS)
-findSGRNA(CDSmoit)
+#################################################
+espece = "Vitis vinifera"
+seq = "atgcct gctggaggat tcgcggcccc gtcggccggt ggcgactttg aagccaagat cactcctatc gttatcattt cttgcatcat ggccgccacc ggcggcctca tgttcggcta cgacgtt"
+gene = "Vvht5"
 
-#seqProm = sequencePromotrice(gene_id,CDSmoit)
-
-#boiteProm(seqProm)
+rechSgRNASeq(espece,seq)
+rechSgRNAGeneId(espece,gene)
+rechBoitPromSeq(espece,seq)
+rechBoitPromGeneId(espece,gene)
+##########################################
