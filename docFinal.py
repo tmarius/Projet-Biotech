@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Sep  7 14:29:26 2018
-
 @author: clarisse
 """
 
@@ -16,11 +15,11 @@ from os import chdir,getcwd
 import time
 import re
 import json
-import crisprPrototype1 
-import toExcel
+
 
 #####################################################FIND GENE ID#########################"
-def searchByNameId(espece, nameId):
+
+def searchByNameId(espece, nameId,driver):
     driver.get("https://www.ncbi.nlm.nih.gov/gene/")
     elem = driver.find_element_by_id("term")
     elem.send_keys(espece + ' ' + nameId)
@@ -42,7 +41,7 @@ def searchByNameId(espece, nameId):
     gene_id = gene_id.group(0)
     return (gene_id)
 
-def searchBySeq(espece, seq):
+def searchBySeq(espece, seq, driver):
     
     if espece == "Vitis vinifera":
         espece = "Vitis vinifera (taxid:29760)"
@@ -85,7 +84,7 @@ def searchBySeq(espece, seq):
 #########################################################FIND CDS##########################################
     
 
-def findCDS(gene_id):
+def findCDS(gene_id, driver):
     driver.get("https://www.ncbi.nlm.nih.gov/gene/")
     query = driver.find_element_by_id("term")
     query.send_keys(gene_id)
@@ -136,7 +135,7 @@ def findCDS(gene_id):
     return (seq)
 
 #######################################################MOITIER SUP#########################################
-def moitieCDS(seq):
+def moitieCDS(seq, driver):
     long = len(seq)
     longmoitie = int(long/2)
     moitie = seq[0:longmoitie]
@@ -144,7 +143,7 @@ def moitieCDS(seq):
 
 
 #######################################################CRISPR SGRNA###########################################
-def findSGRNA(seq):
+def findSGRNA(seq, driver):
     
     #Change le path de download
     path = getcwd(); 
@@ -185,7 +184,7 @@ def findSGRNA(seq):
 #######################################################SEQUENCES PROMOTRICES##############################################
 
 
-def sequencePromotrice(gene_id, CDS):
+def sequencePromotrice(gene_id, CDS, driver):
     driver.get("https://www.ncbi.nlm.nih.gov/gene/")
     query = driver.find_element_by_id("term")
     query.send_keys(gene_id)
@@ -219,7 +218,7 @@ def sequencePromotrice(gene_id, CDS):
         res =  res[coup:len(res)]
     return(res)
     
-def boiteProm(seqProm):
+def boiteProm(seqProm, driver):
     driver.get("https://sogo.dna.affrc.go.jp/cgi-bin/sogo.cgi?lang=en&pj=640&action=page&page=newplace")
     query = driver.find_element_by_xpath("//*[@id='content']/form/textarea")
     query.send_keys(seqProm)
@@ -229,86 +228,115 @@ def boiteProm(seqProm):
     
 #######################################################DEBUT PROGRAMME##############################################
 
-def rechSgRNASeq(espece,seq):
+def rechSgRNASeq(espece,seq, driver):
      
-    gene_id = searchBySeq(espece,seq)
-    CDS = findCDS(gene_id)
-    CDSmoit = moitieCDS(CDS)
-    findSGRNA(CDSmoit)
+    gene_id = searchBySeq(espece,seq, driver)
+    CDS = findCDS(gene_id, driver)
+    CDSmoit = moitieCDS(CDS, driver)
+    findSGRNA(CDSmoit, driver)
 
-def rechSgRNAGeneId(espece,gene):
-    gene_id = searchByNameId(espece,gene)
-    CDS = findCDS(gene_id)
-    CDSmoit = moitieCDS(CDS)
-    findSGRNA(CDSmoit)
+def rechSgRNAGeneId(espece,gene, driver):
+    gene_id = searchByNameId(espece,gene, driver)
+    CDS = findCDS(gene_id, driver)
+    CDSmoit = moitieCDS(CDS, driver)
+    findSGRNA(CDSmoit, driver)
     
-def rechBoitPromSeq(espece,seq):
-    gene_id = searchByNameId(espece,seq)
-    CDS = findCDS(gene_id)
-    CDSmoit = moitieCDS(CDS)
-    seqProm = sequencePromotrice(gene_id,CDSmoit)
-    boiteProm(seqProm)
+def rechBoitPromSeq(espece,seq, driver):
+    gene_id = searchByNameId(espece,seq, driver)
+    CDS = findCDS(gene_id, driver)
+    CDSmoit = moitieCDS(CDS, driver)
+    seqProm = sequencePromotrice(gene_id,CDSmoit, driver)
+    boiteProm(seqProm, driver)
     
-def rechBoitPromGeneId(espece,gene):
-    gene_id = searchByNameId(espece,gene)
-    CDS = findCDS(gene_id)
-    CDSmoit = moitieCDS(CDS)
-    seqProm = sequencePromotrice(gene_id,CDSmoit)
-    boiteProm(seqProm)
+def rechBoitPromGeneId(espece,gene, driver):
+    gene_id = searchByNameId(espece,gene, driver)
+    CDS = findCDS(gene_id, driver)
+    CDSmoit = moitieCDS(CDS, driver)
+    seqProm = sequencePromotrice(gene_id,CDSmoit, driver)
+    boiteProm(seqProm, driver)
     
 #######################################################CRISPR SGRNA###########################################
-def findSGRNA(seq):
-    
-    #Change le path de download
-    path = getcwd(); 
-    path = path + '\\tmp' ;
-    print (path);
-    
-    chrome_options = webdriver.ChromeOptions()
-    prefs = {'download.default_directory' : path }
-    chrome_options.add_experimental_option('prefs', prefs)
-    driver = webdriver.Chrome(chrome_options=chrome_options)
-    
-    driver.get("https://crispr.dbcls.jp/") 
-  
-    elemchampseq = driver.find_element_by_id("useq")
-    elemchampseq.clear()
-    elemchampseq.send_keys(seq)
-    elemspecificitycheck = driver.find_element_by_id("crisprdirect-combobox-dblist-inputEl")
-    elemspecificitycheck.clear()
-    elemspecificitycheck.send_keys("Grape (Vitis vinifera) genome, IGGP_12x (Jun, 2011)")
-    elemspecificitycheck.send_keys(Keys.RETURN)
-     
+#def findSGRNA(seq, driver):
+#    
+#    #Change le path de download
+#    path = getcwd(); 
+#    path = path + '\\tmp' ;
+#    print (path);
+#    
+#    chrome_options = webdriver.ChromeOptions()
+#    prefs = {'download.default_directory' : path }
+#    chrome_options.add_experimental_option('prefs', prefs)
+#    driver = webdriver.Chrome(chrome_options=chrome_options)
+#    
+#    driver.get("https://crispr.dbcls.jp/") 
+#  
+#    elemchampseq = driver.find_element_by_id("useq")
+#    elemchampseq.clear()
+#    elemchampseq.send_keys(seq)
+#    elemspecificitycheck = driver.find_element_by_id("crisprdirect-combobox-dblist-inputEl")
+#    elemspecificitycheck.clear()
+#    elemspecificitycheck.send_keys("Grape (Vitis vinifera) genome, IGGP_12x (Jun, 2011)")
+#    elemspecificitycheck.send_keys(Keys.RETURN)
+#     
+##    driver.find_element_by_xpath("//*[@id='ext-gen1018']/form/div[1]/p[5]/input").click()
+##    time.sleep(1)
+#    WebDriverWait(driver, 5).until(
+#            EC.presence_of_element_located((By.XPATH, "//*[@id='ext-gen1018']/form/div[1]/p[5]/input"))
+#    )
 #    driver.find_element_by_xpath("//*[@id='ext-gen1018']/form/div[1]/p[5]/input").click()
-#    time.sleep(1)
-    WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.XPATH, "//*[@id='ext-gen1018']/form/div[1]/p[5]/input"))
-    )
-    driver.find_element_by_xpath("//*[@id='ext-gen1018']/form/div[1]/p[5]/input").click()
-    
-    WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.XPATH, "//*[@id='ext-gen1018']/form/div[4]/ul/li[2]/a[2]"))
-    )
-    driver.find_element_by_xpath("//*[@id='ext-gen1018']/form/div[4]/ul/li[2]/a[2]").click()
-    time.sleep(9)
-    config = json.loads(open(path+'\CRISPRdirect.json').read())
-    results=config['results']
+#    
+#    WebDriverWait(driver, 5).until(
+#            EC.presence_of_element_located((By.XPATH, "//*[@id='ext-gen1018']/form/div[4]/ul/li[2]/a[2]"))
+#    )
+#    driver.find_element_by_xpath("//*[@id='ext-gen1018']/form/div[4]/ul/li[2]/a[2]").click()
+#    time.sleep(9)
+#    config = json.loads(open(path+'\CRISPRdirect.json').read())
+#    results=config['results']
     
 
 #################################################
-driver = webdriver.Chrome() 
-espece = "Vitis vinifera"
-seq = "atgcct gctggaggat tcgcggcccc gtcggccggt ggcgactttg aagccaagat cactcctatc gttatcattt cttgcatcat ggccgccacc ggcggcctca tgttcggcta cgacgtt"
-gene = "Vvht5"
+#driver = webdriver.Chrome() 
+#espece = "Vitis vinifera"
+#seq = "atgcct gctggaggat tcgcggcccc gtcggccggt ggcgactttg aagccaagat cactcctatc gttatcattt cttgcatcat ggccgccacc ggcggcctca tgttcggcta cgacgtt"
+#gene = "Vvht5"
+
+##rechSgRNASeq(espece,seq)
+#rechSgRNAGeneId(espece,gene)
+##rechBoitPromSeq(espece,seq)
+##rechBoitPromGeneId(espece,gene)
+#sgrna = crisprPrototype1.RetrouveBestSgrna()
+#print (sgrna)
+#toExcel.createExcel(espece, gene, sgrna)
+
+#espece = ""
+#seq = "atgcct gctggaggat tcgcggcccc gtcggccggt ggcgactttg aagccaagat cactcctatc gttatcattt cttgcatcat ggccgccacc ggcggcctca tgttcggcta cgacgtt"
+#gene = "Vvht5"
 
 #rechSgRNASeq(espece,seq)
-rechSgRNAGeneId(espece,gene)
+#rechSgRNAGeneId(espece,gene)
 #rechBoitPromSeq(espece,seq)
 #rechBoitPromGeneId(espece,gene)
-sgrna = crisprPrototype1.RetrouveBestSgrna()
-print (sgrna)
-toExcel.createExcel(espece, gene, sgrna)
-
-
-
 ##########################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Si au moins une chaine de caractère passée est vide, retourne false. Sinon, retourne true
+def isTextsNotEmpty(*args):
+    result=True
+    for arg in args:
+        if not arg:
+            result=False
+    return result
+    
