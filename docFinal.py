@@ -16,7 +16,8 @@ from os import chdir,getcwd
 import time
 import re
 import json
-
+import crisprPrototype1 
+import toExcel
 
 #####################################################FIND GENE ID#########################"
 def searchByNameId(espece, nameId):
@@ -229,21 +230,19 @@ def boiteProm(seqProm):
 #######################################################DEBUT PROGRAMME##############################################
 
 def rechSgRNASeq(espece,seq):
-    driver = webdriver.Chrome()  
+     
     gene_id = searchBySeq(espece,seq)
     CDS = findCDS(gene_id)
     CDSmoit = moitieCDS(CDS)
     findSGRNA(CDSmoit)
 
 def rechSgRNAGeneId(espece,gene):
-    driver = webdriver.Chrome()  
     gene_id = searchByNameId(espece,gene)
     CDS = findCDS(gene_id)
     CDSmoit = moitieCDS(CDS)
     findSGRNA(CDSmoit)
     
 def rechBoitPromSeq(espece,seq):
-    driver = webdriver.Chrome() 
     gene_id = searchByNameId(espece,seq)
     CDS = findCDS(gene_id)
     CDSmoit = moitieCDS(CDS)
@@ -251,20 +250,65 @@ def rechBoitPromSeq(espece,seq):
     boiteProm(seqProm)
     
 def rechBoitPromGeneId(espece,gene):
-    driver = webdriver.Chrome() 
     gene_id = searchByNameId(espece,gene)
     CDS = findCDS(gene_id)
     CDSmoit = moitieCDS(CDS)
     seqProm = sequencePromotrice(gene_id,CDSmoit)
     boiteProm(seqProm)
+    
+#######################################################CRISPR SGRNA###########################################
+def findSGRNA(seq):
+    
+    #Change le path de download
+    path = getcwd(); 
+    path = path + '\\tmp' ;
+    print (path);
+    
+    chrome_options = webdriver.ChromeOptions()
+    prefs = {'download.default_directory' : path }
+    chrome_options.add_experimental_option('prefs', prefs)
+    driver = webdriver.Chrome(chrome_options=chrome_options)
+    
+    driver.get("https://crispr.dbcls.jp/") 
+  
+    elemchampseq = driver.find_element_by_id("useq")
+    elemchampseq.clear()
+    elemchampseq.send_keys(seq)
+    elemspecificitycheck = driver.find_element_by_id("crisprdirect-combobox-dblist-inputEl")
+    elemspecificitycheck.clear()
+    elemspecificitycheck.send_keys("Grape (Vitis vinifera) genome, IGGP_12x (Jun, 2011)")
+    elemspecificitycheck.send_keys(Keys.RETURN)
+     
+#    driver.find_element_by_xpath("//*[@id='ext-gen1018']/form/div[1]/p[5]/input").click()
+#    time.sleep(1)
+    WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.XPATH, "//*[@id='ext-gen1018']/form/div[1]/p[5]/input"))
+    )
+    driver.find_element_by_xpath("//*[@id='ext-gen1018']/form/div[1]/p[5]/input").click()
+    
+    WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.XPATH, "//*[@id='ext-gen1018']/form/div[4]/ul/li[2]/a[2]"))
+    )
+    driver.find_element_by_xpath("//*[@id='ext-gen1018']/form/div[4]/ul/li[2]/a[2]").click()
+    time.sleep(9)
+    config = json.loads(open(path+'\CRISPRdirect.json').read())
+    results=config['results']
+    
 
 #################################################
+driver = webdriver.Chrome() 
 espece = "Vitis vinifera"
 seq = "atgcct gctggaggat tcgcggcccc gtcggccggt ggcgactttg aagccaagat cactcctatc gttatcattt cttgcatcat ggccgccacc ggcggcctca tgttcggcta cgacgtt"
 gene = "Vvht5"
 
-rechSgRNASeq(espece,seq)
+#rechSgRNASeq(espece,seq)
 rechSgRNAGeneId(espece,gene)
-rechBoitPromSeq(espece,seq)
-rechBoitPromGeneId(espece,gene)
+#rechBoitPromSeq(espece,seq)
+#rechBoitPromGeneId(espece,gene)
+sgrna = crisprPrototype1.RetrouveBestSgrna()
+print (sgrna)
+toExcel.createExcel(espece, gene, sgrna)
+
+
+
 ##########################################
